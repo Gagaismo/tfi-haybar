@@ -1,10 +1,10 @@
 // Mock Data
 const mockData = {
     reservas: [
-        { id: 1, cliente: "Carlos Paz", fecha: "2024-12-25", invitados: 50, tipo: "Boda", estado: "Confirmada" },
-        { id: 2, cliente: "Empresa Tech SA", fecha: "2024-11-30", invitados: 120, tipo: "Corporativo", estado: "Pendiente" },
-        { id: 3, cliente: "María Gonzalez", fecha: "2025-01-15", invitados: 30, tipo: "Cumpleaños", estado: "Confirmada" },
-        { id: 4, cliente: "Festival de Jazz", fecha: "2025-02-10", invitados: 300, tipo: "Evento Público", estado: "En Proceso" },
+        { id: 1, cliente: "Carlos Paz", fecha: "25/12/2025", invitados: 50, tipo: "Boda", estado: "Confirmada" },
+        { id: 2, cliente: "Empresa Tech SA", fecha: "30/11/2025", invitados: 120, tipo: "Corporativo", estado: "Pendiente" },
+        { id: 3, cliente: "María Gonzalez", fecha: "15/01/2025", invitados: 30, tipo: "Cumpleaños", estado: "Confirmada" },
+        { id: 4, cliente: "Festival de Jazz", fecha: "10/02/2025", invitados: 300, tipo: "Evento Público", estado: "En Proceso" },
     ],
     inventario: [
         { id: 1, item: "Vodka Absolut", categoria: "Licores", cantidad: 12, unidad: "Botellas", estado: "OK" },
@@ -14,16 +14,16 @@ const mockData = {
         { id: 5, item: "Vasos Trago Largo", categoria: "Vajilla", cantidad: 200, unidad: "Unidades", estado: "OK" },
     ],
     personal: [
-        { id: 1, nombre: "Juan Pérez", rol: "Head Bartender", turno: "Noche", especialidad: "Mixología" },
+        { id: 1, nombre: "Juan Pérez", rol: "Bartender", turno: "Noche", especialidad: "Mixología" },
         { id: 2, nombre: "Ana Gómez", rol: "Runner", turno: "Noche", especialidad: "Logística" },
         { id: 3, nombre: "Pedro Ruiz", rol: "Bartender", turno: "Tarde", especialidad: "Clásicos" },
-        { id: 4, nombre: "Sofia Lert", rol: "Manager", turno: "Full Time", especialidad: "Gestión" },
+        { id: 4, nombre: "Sofia Titoms", rol: "Mozo/a", turno: "Full Time", especialidad: "Gestión" },
     ],
     caja: [
-        { id: 1, concepto: "Adelanto Boda Paz", tipo: "Ingreso", monto: 150000, fecha: "2024-10-20" },
-        { id: 2, concepto: "Compra Licores Mayorista", tipo: "Egreso", monto: 85000, fecha: "2024-10-22" },
-        { id: 3, concepto: "Pago Personal Extra", tipo: "Egreso", monto: 20000, fecha: "2024-10-25" },
-        { id: 4, concepto: "Seña Evento Tech", tipo: "Ingreso", monto: 200000, fecha: "2024-10-28" },
+        { id: 1, concepto: "Adelanto Boda Paz", tipo: "Ingreso", monto: 150000, fecha: "20/10/2025" },
+        { id: 2, concepto: "Compra Licores Mayorista", tipo: "Egreso", monto: 85000, fecha: "22/10/2025" },
+        { id: 3, concepto: "Pago Personal Extra", tipo: "Egreso", monto: 20000, fecha: "25/10/2025" },
+        { id: 4, concepto: "Seña Evento Tech", tipo: "Ingreso", monto: 200000, fecha: "28/10/2025" },
     ]
 };
 
@@ -51,7 +51,7 @@ const renderLanding = () => {
                     <p class="text-white text-lg mb-6 font-light">
                         Elevamos tu evento con coctelería de autor y un servicio impecable. La experiencia Hay! Bar en cada detalle.
                     </p>
-                    <button class="bg-hay-gold text-black font-bold py-3 px-8 uppercase tracking-widest hover:bg-white transition-colors duration-300">
+                    <button data-modal-target="modal-reserva" class="bg-hay-gold text-black font-bold py-3 px-8 uppercase tracking-widest hover:bg-white transition-colors duration-300">
                         Pedir Presupuesto
                     </button>
                 </div>
@@ -62,11 +62,17 @@ const renderLanding = () => {
 
 const renderTable = (title, columns, data, type) => {
     const headers = columns.map(col => `<th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">${col}</th>`).join('');
-    
+
     const rows = data.map(row => {
         const cells = Object.values(row).slice(1).map(val => `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-medium">${val}</td>`).join('');
         return `<tr class="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">${cells}</tr>`;
     }).join('');
+
+    let modalId = '';
+    if (type === 'Reserva') modalId = 'modal-reserva';
+    if (type === 'Item') modalId = 'modal-inventario';
+    if (type === 'Empleado') modalId = 'modal-personal';
+    if (type === 'Movimiento') modalId = 'modal-caja';
 
     return `
         <div class="p-12 w-full h-full bg-gray-50 overflow-y-auto fade-in">
@@ -75,7 +81,7 @@ const renderTable = (title, columns, data, type) => {
                     <h2 class="text-4xl font-black text-hay-dark uppercase tracking-tight">${title}</h2>
                     <p class="text-gray-500 mt-2">Gestión de ${title.toLowerCase()} y operaciones.</p>
                 </div>
-                <button class="bg-hay-dark text-white px-6 py-3 font-bold uppercase text-sm hover:bg-hay-gold hover:text-black transition-colors">
+                <button data-modal-target="${modalId}" class="bg-hay-dark text-white px-6 py-3 font-bold uppercase text-sm hover:bg-hay-gold hover:text-black transition-colors">
                     + Nuevo ${type}
                 </button>
             </div>
@@ -97,8 +103,8 @@ const renderTable = (title, columns, data, type) => {
 // View Router
 const loadView = (viewName) => {
     let content = '';
-    
-    switch(viewName) {
+
+    switch (viewName) {
         case 'landing':
             content = renderLanding();
             break;
@@ -125,11 +131,11 @@ const loadView = (viewName) => {
 navLinks.forEach(link => {
     link.addEventListener('click', (e) => {
         e.preventDefault();
-        
+
         // Update Active State
         navLinks.forEach(l => l.classList.remove('text-hay-gold'));
         navLinks.forEach(l => l.querySelector('span').classList.remove('opacity-100'));
-        
+
         link.classList.add('text-hay-gold');
         link.querySelector('span').classList.add('opacity-100');
 
@@ -143,3 +149,57 @@ navLinks.forEach(link => {
 loadView('landing');
 navLinks[0].classList.add('text-hay-gold');
 navLinks[0].querySelector('span').classList.add('opacity-100');
+
+// Modal Logic
+const openModal = (modalId) => {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('hidden');
+        // Small delay to allow display:block to apply before opacity transition
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            modal.classList.add('active');
+        }, 10);
+    }
+};
+
+const closeModal = (modal) => {
+    modal.classList.remove('active');
+    modal.classList.add('opacity-0');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300); // Match transition duration
+};
+
+// Event Delegation for Modals
+document.addEventListener('click', (e) => {
+    // Open Modal
+    const openBtn = e.target.closest('[data-modal-target]');
+    if (openBtn) {
+        const modalId = openBtn.getAttribute('data-modal-target');
+        openModal(modalId);
+    }
+
+    // Close Modal (X button)
+    const closeBtn = e.target.closest('.modal-close');
+    if (closeBtn) {
+        const modal = closeBtn.closest('.modal');
+        closeModal(modal);
+    }
+
+    // Close Modal (Click Outside)
+    if (e.target.classList.contains('modal')) {
+        closeModal(e.target);
+    }
+});
+
+// Form Submission Simulation
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        alert('Datos guardados correctamente (Simulación)');
+        const modal = form.closest('.modal');
+        closeModal(modal);
+        form.reset();
+    });
+});
